@@ -1,0 +1,47 @@
+# Version of Docker-compose
+version: '3.3'
+services:
+  react:
+      build:
+        # Location to the dockerfile
+        context: ./client
+        # Name of the dockerfile
+        dockerfile: react.dockerfile
+      volumes:
+          # Bind-mounts configuration
+        - ./client:/client
+          # Ignoring any changes made in "node_modules" folder
+        - /client/node_modules
+      ports:
+          # External port:Internal port
+        - 3000:3000
+      container_name: mern-react
+      depends_on:
+          # Starts up the node service before starting up the react service
+        - node
+      environment:
+        # Enabling hot reload
+        - CHOKIDAR_USEPOLLING=true
+  # Service name
+  node:
+    # Creating a custom image
+    build:
+      # Location to the Dockerfile
+      context: ./server
+      # Name of the Dockerfile
+      dockerfile: node.dockerfile
+    # ADD THE CONFIGURATION FROM THIS POINT to create a volume named nodeVolume
+    container_name: mern-node
+    volumes:
+      - ./server:/server
+      - /server/node_modules
+    ports:
+        # External port:Internal port
+      - 5000:5000
+  # Add the react service
+  
+
+# Making the node service volume accessible to other services.
+volumes:
+  # Declaring the node service volume.
+  nodeVolume:
