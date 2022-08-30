@@ -2,26 +2,28 @@
 version: '3.3'
 services:
   react:
-      build:
-        # Location to the dockerfile
-        context: ./client
-        # Name of the dockerfile
-        dockerfile: react.dockerfile
-      volumes:
-          # Bind-mounts configuration
-        - ./client:/client
-          # Ignoring any changes made in "node_modules" folder
-        - /client/node_modules
-      ports:
-          # External port:Internal port
-        - 3000:3000
-      container_name: mern-react
-      depends_on:
-          # Starts up the node service before starting up the react service
-        - node
-      environment:
-        # Enabling hot reload
-        - CHOKIDAR_USEPOLLING=true
+    build:
+      # Location to the dockerfile
+      context: ./client
+      # Name of the dockerfile
+      dockerfile: react.dockerfile
+    volumes:
+        # Bind-mounts configuration
+      - ./client:/client
+        # Ignoring any changes made in "node_modules" folder
+      - /client/node_modules
+    ports:
+        # External port:Internal port
+      - 3000:3000
+    container_name: mern-react
+    depends_on:
+        # Starts up the node service before starting up the react service
+      - node
+    environment:
+      # Enabling hot reload
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+       - mern_network
   # Service name
   node:
     # Creating a custom image
@@ -38,10 +40,27 @@ services:
     ports:
         # External port:Internal port
       - 5000:5000
-  # Add the react service
-  
+    networks:
+       - mern_network
+
+  nginx:
+    container_name: nginx
+    build:
+      context: ./nginx
+      dockerfile: nginx.dockerfile
+    ports:
+      - "80:80"
+    networks:
+      - mern_network
+    depends_on:
+      - react
+      - node
+
+networks: # 가장 기본적인 bridge 네트워크
+  mern_network:
+    driver: bridge
 
 # Making the node service volume accessible to other services.
-volumes:
+# volumes:
   # Declaring the node service volume.
-  nodeVolume:
+  # nodeVolume:
